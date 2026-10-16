@@ -257,6 +257,13 @@ RETRO_API void retro_set_environment(retro_environment_t cb) {
         // GPU tries the host's hardware decoders (CUDA, VA-API, Vulkan video) first; where
         // there are none, CPU decodes the games' videos in software straight away.
         {"suyu_nvdec_emulation", "Video Decoding (reload content); GPU|CPU|Off"},
+        // Low skips some of the GPU's work done for accuracy: faster, with more glitches
+        {"suyu_gpu_accuracy", "GPU Accuracy (reload content); High|Low"},
+        // Shaders built once are kept on disk (system/suyu/shader) and loaded at the next start
+        {"suyu_disk_shader_cache", "Disk Shader Cache (reload content); Enabled|Disabled"},
+        // A new shader is built in the background, the draws needing it skipped meanwhile,
+        // instead of the game stopping until it is ready
+        {"suyu_async_shaders", "Asynchronous Shader Building (reload content); Disabled|Enabled"},
         {"suyu_cpu_accuracy", "CPU Accuracy (reload content); Auto|Accurate|Unsafe"},
         {"suyu_use_docked", "Docked Mode (reload content); Yes|No"},
         {"suyu_fastmem", "Fastmem (reload content); Enabled|Disabled"},
@@ -1022,6 +1029,23 @@ RETRO_API bool retro_load_game(const struct retro_game_info* game) {
                 v == "CPU" ? Settings::NvdecEmulation::Cpu
                 : v == "Off" ? Settings::NvdecEmulation::Off
                              : Settings::NvdecEmulation::Gpu);
+        }
+        var.key = "suyu_gpu_accuracy";
+        var.value = nullptr;
+        if (g_environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
+            Settings::values.gpu_accuracy.SetValue(std::string(var.value) == "Low"
+                                                       ? Settings::GpuAccuracy::Low
+                                                       : Settings::GpuAccuracy::High);
+        }
+        var.key = "suyu_disk_shader_cache";
+        var.value = nullptr;
+        if (g_environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
+            Settings::values.use_disk_shader_cache.SetValue(std::string(var.value) != "Disabled");
+        }
+        var.key = "suyu_async_shaders";
+        var.value = nullptr;
+        if (g_environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
+            Settings::values.use_asynchronous_shaders.SetValue(std::string(var.value) == "Enabled");
         }
         var.key = "suyu_anti_aliasing";
         var.value = nullptr;

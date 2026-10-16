@@ -417,7 +417,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            build-essential pkg-config ninja-build nasm autoconf glslang-tools \
+            build-essential pkg-config ninja-build nasm autoconf glslang-tools ccache \
             libboost-dev libboost-filesystem-dev libboost-context-dev \
             libusb-1.0-0-dev libssl-dev \
             libavcodec-dev libavformat-dev libavutil-dev libavfilter-dev \
@@ -434,6 +434,15 @@ jobs:
           sudo mkdir -p /opt/cmake
           sudo tar xzf /tmp/cmake.tar.gz -C /opt/cmake --strip-components=1
           echo /opt/cmake/bin >> "$GITHUB_PATH"
+      # The compiled objects kept between runs of the same platform (ccache): a run
+      # rebuilds only what changed since the last one
+      - name: Compiler cache (Linux)
+        if: startsWith(matrix.platform, 'linux')
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ccache-libretro-${{ matrix.platform }}-${{ github.sha }}
+          restore-keys: ccache-libretro-${{ matrix.platform }}-
       - uses: ilammy/msvc-dev-cmd@v1
         with:
           vsversion: '2022'
@@ -459,7 +468,7 @@ jobs:
         run: |
           extra=()
           case '${{ matrix.platform }}' in
-            linux*) extra+=(-Dfmt_FORCE_BUNDLED=ON) ;;
+            linux*) extra+=(-Dfmt_FORCE_BUNDLED=ON -DUSE_CCACHE=ON) ;;
             macos) extra+=(-Dfmt_FORCE_BUNDLED=ON -DVulkanHeaders_FORCE_BUNDLED=ON
                            "-DCMAKE_PREFIX_PATH=$(brew --prefix)") ;;
           esac
@@ -470,7 +479,12 @@ jobs:
             -DSUYU_BUILD_LIBRETRO_CORE=ON "${extra[@]}"
       - name: Build
         shell: bash
-        run: cmake --build build --target suyu_libretro
+        run: |
+          if [[ '${{ matrix.platform }}' == linux* ]]; then
+            export CCACHE_DIR="$HOME/.cache/ccache" CCACHE_MAXSIZE=2G CCACHE_COMPRESS=1
+          fi
+          cmake --build build --target suyu_libretro
+          if [[ '${{ matrix.platform }}' == linux* ]]; then ccache -s; fi
       - name: Package (Linux)
         if: startsWith(matrix.platform, 'linux')
         run: |

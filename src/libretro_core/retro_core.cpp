@@ -71,14 +71,14 @@
 #include "input_common/main.h"
 #include "network/network.h"
 #include "libretro_core/libretro.h"
-#include "video_core/vulkan_common/vulkan.h"
-#include "libretro_core/libretro_vulkan.h"
 #include "libretro_core/retro_emu_window.h"
 #include "suyu_cmd/explicit_update.h"
 #include "video_core/gpu.h"
 #include "video_core/renderer_base.h"
 #include "video_core/shader_notify.h"
 #include "video_core/vulkan_common/vulkan_external.h"
+// After vulkan_external.h, which sets VK_NO_PROTOTYPES: the core types, no platform headers
+#include "libretro_core/libretro_vulkan.h"
 
 namespace {
 

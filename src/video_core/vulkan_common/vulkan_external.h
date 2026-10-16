@@ -6,7 +6,12 @@
 #include <functional>
 
 #include "common/common_types.h"
-#include "video_core/vulkan_common/vulkan.h"
+// The core Vulkan types only: the libretro core includes this, and the platform headers
+// video_core/vulkan_common/vulkan.h pulls in (Xlib) define macros like Success and None
+#ifndef VK_NO_PROTOTYPES
+#define VK_NO_PROTOTYPES
+#endif
+#include <vulkan/vulkan_core.h>
 
 // A Vulkan context owned by a frontend the renderer runs inside of (the libretro core):
 // the renderer uses the frontend's instance and physical device, creates its device

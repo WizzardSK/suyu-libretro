@@ -251,6 +251,9 @@ RETRO_API void retro_set_environment(retro_environment_t cb) {
         {"suyu_resolution", "Internal Resolution (reload content); 1x|0.5x|0.75x|2x|3x|4x"},
         {"suyu_scaling_filter", "Window Adapting Filter (reload content); Bilinear|Bicubic|Lanczos|ScaleForce|FSR|NearestNeighbor"},
         {"suyu_anti_aliasing", "Anti-Aliasing (reload content); None|FXAA|SMAA"},
+        // GPU tries the host's hardware decoders (CUDA, VA-API, Vulkan video) first; where
+        // there are none, CPU decodes the games' videos in software straight away.
+        {"suyu_nvdec_emulation", "Video Decoding (reload content); GPU|CPU|Off"},
         {"suyu_cpu_accuracy", "CPU Accuracy (reload content); Auto|Accurate|Unsafe"},
         {"suyu_use_docked", "Docked Mode (reload content); Yes|No"},
         {"suyu_fastmem", "Fastmem (reload content); Enabled|Disabled"},
@@ -811,6 +814,15 @@ RETRO_API bool retro_load_game(const struct retro_game_info* game) {
             else if (v == "FSR") f = Settings::ScalingFilter::Fsr;
             else if (v == "NearestNeighbor") f = Settings::ScalingFilter::NearestNeighbor;
             Settings::values.scaling_filter.SetValue(f);
+        }
+        var.key = "suyu_nvdec_emulation";
+        var.value = nullptr;
+        if (g_environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
+            const std::string v(var.value);
+            Settings::values.nvdec_emulation.SetValue(
+                v == "CPU" ? Settings::NvdecEmulation::Cpu
+                : v == "Off" ? Settings::NvdecEmulation::Off
+                             : Settings::NvdecEmulation::Gpu);
         }
         var.key = "suyu_anti_aliasing";
         var.value = nullptr;

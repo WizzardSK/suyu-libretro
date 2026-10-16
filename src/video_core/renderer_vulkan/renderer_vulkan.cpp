@@ -183,10 +183,10 @@ try
     is_headless = (render_window.GetWindowInfo().type == Core::Frontend::WindowSystemType::Headless);
 
     if (External::IsActive()) {
-        auto& context = External::GetContext();
-        context.device = *device.GetLogical();
-        context.queue = *device.GetGraphicsQueue();
-        context.queue_family = device.GetGraphicsFamily();
+        auto& external = External::GetContext();
+        external.device = *device.GetLogical();
+        external.queue = *device.GetGraphicsQueue();
+        external.queue_family = device.GetGraphicsFamily();
     }
 
     if (Settings::values.renderer_force_max_clock.GetValue() && device.ShouldBoostClocks()) {

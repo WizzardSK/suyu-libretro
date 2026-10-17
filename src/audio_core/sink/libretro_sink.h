@@ -129,7 +129,7 @@ public:
         }
     }
 
-    SinkStream* AcquireSinkStream(Core::System& system, u32 system_channels, const std::string&,
+    SinkStream* AcquireSinkStream(Core::System& system, u32 stream_channels, const std::string&,
                                   StreamType type) override {
         std::scoped_lock lock{InstanceMutex()};
         // The renderer's first stream feeds LibretroSampleQueue; audio out
@@ -139,7 +139,7 @@ public:
             has_primary = true;
         }
         auto stream =
-            std::make_unique<LibretroSinkStreamImpl>(system, type, primary, system_channels);
+            std::make_unique<LibretroSinkStreamImpl>(system, type, primary, stream_channels);
         auto* raw = stream.get();
         streams.push_back(std::move(stream));
         return raw;

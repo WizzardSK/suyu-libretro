@@ -358,7 +358,14 @@ RETRO_API void retro_init() {
     Settings::values.cpuopt_fastmem.SetValue(true);
     Settings::values.cpuopt_fastmem_exclusives.SetValue(true);
     Settings::values.log_flush_line.SetValue(true);
-    Settings::values.log_filter.SetValue("*:Info Service.VI:Debug Service.AM:Debug Service.Nvnflinger:Debug");
+    // SUYU_LIBRETRO_LOG_FILTER replaces the default filter (suyu's syntax, "*:Info HW.GPU:Trace"),
+    // for a log of what the default leaves out
+    if (const char* filter = std::getenv("SUYU_LIBRETRO_LOG_FILTER"); filter && *filter) {
+        Settings::values.log_filter.SetValue(filter);
+    } else {
+        Settings::values.log_filter.SetValue(
+            "*:Info Service.VI:Debug Service.AM:Debug Service.Nvnflinger:Debug");
+    }
     g_system->ApplySettings();
     g_system->SetContentProvider(std::make_unique<FileSys::ContentProviderUnion>());
     g_system->SetFilesystem(std::make_shared<FileSys::RealVfsFilesystem>());

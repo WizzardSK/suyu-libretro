@@ -33,6 +33,10 @@ The port must be a decimal integer from 1 through 65535. Set these variables
 before loading content. These free-form values are not exposed as misleading
 single-choice core options.
 
+`SUYU_LIBRETRO_LOG_FILTER` replaces the core's log filter, in suyu's syntax
+(for example `*:Info HW.GPU:Trace Service.NVDRV:Debug`), for a log of what the
+default filter leaves out. The log is suyu's own `log/suyu_log.txt`.
+
 For an Android ARM64 libretro build, configure with
 `SUYU_BUILD_LIBRETRO_CORE=ON`, `SUYU_ANDROID_LIBRETRO=ON`, and
 `YUZU_USE_BUNDLED_OPENSSL=OFF` using the Android toolchain. This opt-in mode

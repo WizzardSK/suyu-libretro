@@ -597,6 +597,10 @@ bool RequestVulkanPresent() {
     hw_render.version_minor = 0;
     hw_render.context_reset = OnVulkanContextReset;
     hw_render.context_destroy = OnVulkanContextDestroy;
+    // The renderer cannot move to another device: RetroArch keeps this one when it rebuilds
+    // its video driver (a fullscreen toggle, a driver setting) instead of destroying it
+    // under the running renderer. Its interface is asked for every frame anyway.
+    hw_render.cache_context = true;
     if (!g_environ_cb(RETRO_ENVIRONMENT_SET_HW_RENDER, &hw_render)) {
         LOG_INFO(Frontend, "libretro: the frontend has no Vulkan context, frames are read back");
         return false;

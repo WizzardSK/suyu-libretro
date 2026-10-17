@@ -366,6 +366,13 @@ RETRO_API void retro_init() {
         Settings::values.log_filter.SetValue(
             "*:Info Service.VI:Debug Service.AM:Debug Service.Nvnflinger:Debug");
     }
+    // The backend parsed log_filter when Common::Log::Initialize() made it, before either value
+    // above was set, so it is handed the filter again; without this both went unused
+    {
+        Common::Log::Filter log_filter;
+        log_filter.ParseFilterString(Settings::values.log_filter.GetValue());
+        Common::Log::SetGlobalFilter(log_filter);
+    }
     g_system->ApplySettings();
     g_system->SetContentProvider(std::make_unique<FileSys::ContentProviderUnion>());
     g_system->SetFilesystem(std::make_shared<FileSys::RealVfsFilesystem>());

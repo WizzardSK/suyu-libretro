@@ -248,7 +248,7 @@ RETRO_API void retro_set_environment(retro_environment_t cb) {
     static const struct retro_variable vars[] = {
         // This headless readback window only implements Vulkan. Advertising
         // other renderers would claim an option that cannot take effect.
-        {"suyu_resolution", "Internal Resolution (reload content); 1x|0.5x|0.75x|2x|3x|4x"},
+        {"suyu_resolution", "Internal Resolution (reload content); 1x|0.25x|0.5x|0.75x|2x|3x|4x"},
         {"suyu_scaling_filter", "Window Adapting Filter (reload content); Bilinear|Bicubic|Lanczos|ScaleForce|FSR|NearestNeighbor"},
         {"suyu_anti_aliasing", "Anti-Aliasing (reload content); None|FXAA|SMAA"},
         {"suyu_cpu_accuracy", "CPU Accuracy (reload content); Auto|Accurate|Unsafe"},
@@ -793,7 +793,8 @@ RETRO_API bool retro_load_game(const struct retro_game_info* game) {
             const std::string v(var.value);
             auto res = Settings::ResolutionSetup::Res1X;
             // Below 1x for a GPU that cannot keep up at the game's own resolution
-            if (v == "0.5x") res = Settings::ResolutionSetup::Res1_2X;
+            if (v == "0.25x") res = Settings::ResolutionSetup::Res1_4X;
+            else if (v == "0.5x") res = Settings::ResolutionSetup::Res1_2X;
             else if (v == "0.75x") res = Settings::ResolutionSetup::Res3_4X;
             else if (v == "2x") res = Settings::ResolutionSetup::Res2X;
             else if (v == "3x") res = Settings::ResolutionSetup::Res3X;

@@ -118,10 +118,7 @@ private:
  */
 class LibretroSink final : public Sink {
 public:
-    explicit LibretroSink(std::string_view) {
-        std::scoped_lock lock{InstanceMutex()};
-        Instance() = this;
-    }
+    explicit LibretroSink(std::string_view) {}
     ~LibretroSink() override {
         std::scoped_lock lock{InstanceMutex()};
         if (Instance() == this) {
@@ -132,6 +129,14 @@ public:
     SinkStream* AcquireSinkStream(Core::System& system, u32 stream_channels, const std::string&,
                                   StreamType type) override {
         std::scoped_lock lock{InstanceMutex()};
+        // The audio core makes an output and an input sink from the same
+        // setting; MixOut plays the audio out streams of the one that has them.
+        // Taking whichever was made last pointed it at the input sink, so a
+        // game's audio out was never played or released and a movie stopped
+        // after its first frames.
+        if (type == StreamType::Out) {
+            Instance() = this;
+        }
         // The renderer's first stream feeds LibretroSampleQueue; audio out
         // streams are played by MixOut
         const bool primary = (type == StreamType::Render) && !has_primary;

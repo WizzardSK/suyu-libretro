@@ -591,8 +591,20 @@ RETRO_API void retro_run() {
         }
 
         const size_t frames = std::min(kFramesPerCall, pending.size() / 2);
+
+        // Audio out streams (a movie's sound) are played here, a frame's worth
+        // each run, mixed over the renderer's output: playing them is what
+        // releases the game's buffers. With them the frontend gets a full
+        // frame's worth, the renderer's part padded with silence.
+        static std::vector<s16> out;
+        out.assign(kFramesPerCall * 2, 0);
+        std::copy_n(pending.begin(), frames * 2, out.begin());
+        const bool mixed = AudioCore::Sink::LibretroSink::MixOut(out, kFramesPerCall);
+        const size_t send = mixed ? kFramesPerCall : frames;
+        if (send > 0) {
+            g_audio_batch_cb(out.data(), send);
+        }
         if (frames > 0) {
-            g_audio_batch_cb(pending.data(), frames);
             pending.erase(pending.begin(), pending.begin() + static_cast<ptrdiff_t>(frames * 2));
         }
     }
